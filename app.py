@@ -295,8 +295,8 @@ def show_dashboard():
 
         with st.container():
             st.markdown("""
-            <div class="glass-card-container" style="margin-top: 10px;">
-                <div style='margin-bottom:10px; font-weight:600; color:#fff; letter-spacing:1px;'>PANEL KONTROL</div>
+            <div class="glass-card-container" style="margin-top: 20px;">
+                <div style='margin-bottom:20px; font-weight:600; color:#fff; letter-spacing:1px;'>PANEL KONTROL</div>
             """, unsafe_allow_html=True)
             
             ctrl_c1, ctrl_c2 = st.columns(2)
@@ -379,4 +379,5 @@ if __name__ == "__main__":
         show_dashboard()
     else:
         show_home()
+
 

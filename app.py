@@ -106,7 +106,7 @@ def update_mode():
     st.session_state.dummy_data['control']['mode'] = db_val
 
 # ==========================================
-# 6. STYLING CSS (RAPi & BERSIH)
+# 6. STYLING CSS (TOMBOL BESAR & VERTICAL LAYOUT)
 # ==========================================
 st.markdown("""
 <style>
@@ -139,8 +139,8 @@ st.markdown("""
     }
 
     /* VISUAL TANGKI */
-    .tank-wrapper-fix { display: flex; justify-content: center; align-items: center; height: 300px; position: relative; }
-    .tank-body-fix { position: relative; width: 140px; height: 260px; background: rgba(255, 255, 255, 0.05); border: 4px solid rgba(255, 255, 255, 0.4); border-radius: 15px; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    .tank-wrapper-fix { display: flex; justify-content: center; align-items: center; height: 350px; position: relative; }
+    .tank-body-fix { position: relative; width: 150px; height: 300px; background: rgba(255, 255, 255, 0.05); border: 4px solid rgba(255, 255, 255, 0.4); border-radius: 15px; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
     .water-fix { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 25px #00f2fe; opacity: 0.9; }
     .tank-label-fix { position: absolute; width: 100%; text-align: center; top: 50%; transform: translateY(-50%); font-size: 1.8rem; font-weight: 800; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.8); z-index: 20; }
     .line-fix { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.2); left: 0; z-index: 5; }
@@ -151,12 +151,38 @@ st.markdown("""
     .stat-value-fix { font-size: 2.2rem; font-weight: 700; color: white; }
     .unit-fix { font-size: 1rem; color: #4facfe; font-weight: 400; }
 
-    /* MODIFIKASI TOMBOL */
-    div[data-testid="stCheckbox"] label span { font-size: 1.1rem !important; }
-    div[data-testid="stCheckbox"] div[role="switch"] { transform: scale(1.3); margin-right: 10px; }
-    div[role="radiogroup"] { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 12px; justify-content: space-evenly; }
-    div[role="radiogroup"] label { font-weight: 600 !important; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 16px !important; transition: all 0.3s; }
-    div[role="radiogroup"] label:hover { border-color: #4facfe; background: rgba(79, 172, 254, 0.1); }
+    /* MODIFIKASI UKURAN TOMBOL (THE BIG SWITCH) */
+    /* Target Toggle Switch agar lebih besar */
+    div[data-testid="stCheckbox"] label span {
+        font-size: 1.2rem !important; /* Label toggle */
+    }
+    div[data-testid="stCheckbox"] div[role="switch"] {
+        transform: scale(1.4); /* Memperbesar ukuran fisik saklar */
+        margin-right: 10px;
+    }
+    
+    /* MODIFIKASI RADIO BUTTON (MODE SELECTION) */
+    div[role="radiogroup"] {
+        background: rgba(0,0,0,0.2);
+        padding: 10px;
+        border-radius: 15px;
+        justify-content: space-evenly;
+    }
+    div[role="radiogroup"] label {
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 20px !important;
+        width: 100%;
+        text-align: center;
+        transition: all 0.3s;
+    }
+    div[role="radiogroup"] label:hover {
+        border-color: #4facfe;
+        background: rgba(79, 172, 254, 0.1);
+    }
 
     #MainMenu, footer, header {visibility: hidden;}
 </style>
@@ -201,7 +227,7 @@ def show_dashboard():
 
     # === KOLOM KANAN: DATA & KONTROL ===
     with col_right:
-        # --- BAGIAN 1: STATISTIK ---
+        # --- BAGIAN 1: STATISTIK (Dua Kotak Berdampingan) ---
         c1, c2 = st.columns(2, gap="medium")
         with c1:
             st.markdown(f"""
@@ -220,37 +246,51 @@ def show_dashboard():
             </div>
             """, unsafe_allow_html=True)
 
-        # --- BAGIAN 2: KONTROL PANEL (KEMBALI RAPI) ---
+        # --- BAGIAN 2: KONTROL PANEL (Disusun Vertikal) ---
+        
+        # A. PILIHAN MODE (PALING ATAS & BESAR)
         st.markdown('<div class="glass-card-container">', unsafe_allow_html=True)
-        st.markdown("<div style='margin-bottom:15px; font-weight:600; color:#fff; letter-spacing:1px;'>PANEL KONTROL</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:10px; font-weight:600; color:#fff; letter-spacing:1px;'>1. PILIH MODE OPERASI</div>", unsafe_allow_html=True)
         
-        ctrl_c1, ctrl_c2 = st.columns(2, gap="large")
+        # Radio Button Horizontal yang besar
+        mode_options = ["🤖 MODE AUTO", "👋 MODE MANUAL"]
+        curr_idx = 0 if mode == "AUTO" else 1
         
-        with ctrl_c1:
-            st.write("📡 **Mode Operasi**")
-            st.radio(
-                "Pilih Mode",
-                ["🤖 MODE AUTO", "👋 MODE MANUAL"],
-                index=0 if mode == "AUTO" else 1,
-                key="radio_mode",
-                horizontal=True,
-                label_visibility="collapsed",
-                on_change=update_mode
-            )
+        st.radio(
+            "Pilih Mode",
+            mode_options,
+            index=curr_idx,
+            key="radio_mode",
+            horizontal=True,
+            label_visibility="collapsed",
+            on_change=update_mode
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        with ctrl_c2:
-            st.write("🔌 **Saklar Pompa**")
+        # B. SAKLAR POMPA MANUAL (DI BAWAHNYA & BESAR)
+        st.markdown('<div class="glass-card-container">', unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:10px; font-weight:600; color:#fff; letter-spacing:1px;'>2. KONTROL MANUAL</div>", unsafe_allow_html=True)
+        
+        col_ctrl_1, col_ctrl_2 = st.columns([2, 1])
+        
+        with col_ctrl_1:
             is_disabled = (mode == "AUTO")
+            # Toggle Switch Besar
+            st.write("") # Spacer dikit
             st.toggle(
-                "Power Pompa", 
+                "SAKLAR POMPA UTAMA", 
                 value=is_pump_on, 
                 key="toggle_pump", 
                 disabled=is_disabled, 
-                label_visibility="collapsed",
                 on_change=update_pump_toggle
             )
-            caption = "🔒 *Mode AUTO aktif*" if is_disabled else "👆 *Geser untuk ON/OFF*"
-            st.caption(caption)
+        
+        with col_ctrl_2:
+            # Status text di sebelah toggle
+            if is_disabled:
+                st.info("🔒 **Terkunci**\n(Mode Auto Aktif)")
+            else:
+                st.success("🔓 **Terbuka**\n(Siap Kontrol)")
                 
         st.markdown('</div>', unsafe_allow_html=True)
 

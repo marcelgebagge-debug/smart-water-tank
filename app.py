@@ -268,10 +268,7 @@ def show_dashboard():
             </div>
             """, unsafe_allow_html=True)
 
-        # --- BAGIAN 2: PANEL KONTROL MENYATU ---
-        st.markdown('<div class="glass-card-container" style="margin-top: 10px;">', unsafe_allow_html=True)
-        st.markdown('<div class="panel-header">PANEL KONTROL</div>', unsafe_allow_html=True)
-        
+
         # Grid layout di dalam panel kontrol (2 Kolom)
         ctrl_c1, ctrl_c2 = st.columns(2, gap="large")
         
@@ -343,3 +340,4 @@ if __name__ == "__main__":
         show_dashboard()
     else:
         show_home()
+

@@ -10,7 +10,7 @@ import os
 PAKAI_FIREBASE_ASLI = True
 URL_DATABASE = 'https://smart-water-tank-f1b98-default-rtdb.asia-southeast1.firebasedatabase.app'
 
-st.set_page_config(page_title="Smart Water Tank Dashboard", layout="wide", page_icon="💧")
+st.set_page_config(page_title="Smart Water Tank", layout="wide", page_icon="💧")
 
 # ==========================================
 # 2. LIBRARY CHECK
@@ -105,75 +105,128 @@ def update_mode():
     st.session_state.dummy_data['control']['mode'] = new_mode
 
 # ==========================================
-# 6. STYLING CSS (FIXED)
+# 6. STYLING CSS (LANDING PAGE KEREN)
 # ==========================================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
     * { font-family: 'Poppins', sans-serif !important; }
 
+    /* Background Utama */
     .stApp {
-        background: radial-gradient(circle at 10% 20%, #0f2027 0%, #203a43 90%, #2c5364 100%);
+        background: radial-gradient(circle at center, #1a2a6c 0%, #b21f1f 0%, #fdbb2d 0%); /* Fallback */
+        background: radial-gradient(circle at 50% 10%, #1e3c72 0%, #2a5298 40%, #0f2027 100%);
         color: white;
     }
 
-    /* GLASS CARD YANG DIPERBAIKI */
-    .glass-card-container {
+    /* === LANDING PAGE STYLES === */
+    
+    /* Hero Title dengan Gradasi */
+    .hero-title {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 800;
+        text-align: center;
+        background: linear-gradient(to right, #00c6ff, #0072ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-top: 20px;
+        text-shadow: 0 0 40px rgba(0, 198, 255, 0.3);
+        animation: fadeInDown 1s ease-out;
+    }
+    
+    .hero-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #e0e0e0;
+        margin-bottom: 40px;
+        font-weight: 300;
+        letter-spacing: 1px;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Gambar Utama di Landing Page */
+    .hero-image-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+        animation: zoomIn 1.2s ease-out;
+    }
+    .hero-image-container img {
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0, 198, 255, 0.5);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s;
+    }
+    .hero-image-container img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 50px rgba(0, 198, 255, 0.8);
+    }
+
+    /* Fitur Cards (Grid) */
+    .feature-card {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
         padding: 20px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        margin-bottom: 20px;
-        height: 100%; /* Agar tinggi konsisten */
+        border-radius: 15px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s, background 0.3s;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #00c6ff;
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    .feature-title {
+        font-weight: 700; color: #fff; margin-bottom: 5px;
+    }
+    .feature-desc {
+        font-size: 0.85rem; color: #ccc;
     }
 
-    .main-title {
-        font-size: 2.5rem; font-weight: 700; text-align: center;
-        background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    /* Tombol Start yang Mencolok */
+    .start-btn-container {
+        display: flex; justify-content: center; margin-top: 50px; margin-bottom: 50px;
     }
-    .sub-title {
-        text-align: center; color: #a8b0c5; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 40px;
+    /* Kita menargetkan tombol Streamlit secara spesifik */
+    div.stButton > button {
+        background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 50px;
+        box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3);
+        transition: all 0.3s;
+        width: 100%;
     }
-
-    /* VISUAL TANGKI (FIXED) */
-    .tank-wrapper-fix {
-        display: flex; justify-content: center; align-items: center; height: 300px;
-        position: relative;
-    }
-    .tank-body-fix {
-        position: relative; width: 140px; height: 260px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 4px solid rgba(255, 255, 255, 0.4);
-        border-radius: 15px; overflow: hidden;
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-    }
-    .water-fix {
-        position: absolute; bottom: 0; left: 0; width: 100%;
-        background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
-        transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); /* Animasi lebih halus */
-        box-shadow: 0 0 25px #00f2fe;
-        opacity: 0.9;
-    }
-    .tank-label-fix {
-        position: absolute; width: 100%; text-align: center;
-        top: 50%; transform: translateY(-50%);
-        font-size: 1.8rem; font-weight: 800; color: white;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.8); z-index: 20;
-    }
-    .line-fix {
-        position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.2); left: 0; z-index: 5;
+    div.stButton > button:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 30px rgba(0, 114, 255, 0.5);
     }
 
-    /* STATISTIK (FIXED) */
+    /* Animasi Keyframes */
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    /* Dashboard Styles (Keep Existing) */
+    .glass-card-container { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); margin-bottom: 20px; }
+    .tank-wrapper-fix { display: flex; justify-content: center; align-items: center; height: 300px; position: relative; }
+    .tank-body-fix { position: relative; width: 140px; height: 260px; background: rgba(255, 255, 255, 0.05); border: 4px solid rgba(255, 255, 255, 0.4); border-radius: 15px; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    .water-fix { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 25px #00f2fe; opacity: 0.9; }
+    .tank-label-fix { position: absolute; width: 100%; text-align: center; top: 50%; transform: translateY(-50%); font-size: 1.8rem; font-weight: 800; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.8); z-index: 20; }
+    .line-fix { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.2); left: 0; z-index: 5; }
     .stat-box { padding: 10px; text-align: center; }
     .stat-label-fix { color: #a8b0c5; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
     .stat-value-fix { font-size: 2rem; font-weight: 700; color: white; }
     .unit-fix { font-size: 1rem; color: #4facfe; font-weight: 400; }
-
     #MainMenu, footer, header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
@@ -192,14 +245,18 @@ def show_dashboard():
     is_pump_on = bool(data['status']['pump'])
     mode = str(data['control']['mode'])
 
-    st.markdown('<div class="main-title">💧 SMART WATER TANK</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">REALTIME MONITORING SYSTEM</div>', unsafe_allow_html=True)
+    # Tombol Back to Home (Kecil di pojok)
+    if st.button("⬅️ Kembali ke Home"):
+        st.session_state.show_dashboard = False
+        st.rerun()
+
+    st.markdown('<div style="text-align:center; font-size:2.5rem; font-weight:700; background: linear-gradient(to right, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">DASHBOARD MONITORING</div>', unsafe_allow_html=True)
+    st.write("") # Spacer
 
     col_left, col_right = st.columns([1.2, 1.8], gap="large")
 
-    # === KOLOM KIRI: VISUALISASI TANGKI (FIXED HTML) ===
+    # === KOLOM KIRI: VISUALISASI TANGKI ===
     with col_left:
-        # Menggunakan .format() agar HTML string aman
         tank_html = """
         <div class="glass-card-container">
             <div style='text-align:center; margin-bottom:20px; font-weight:600; color:#4facfe; letter-spacing:1px;'>VISUAL LEVEL</div>
@@ -216,9 +273,8 @@ def show_dashboard():
         """.format(lvl=lvl)
         st.markdown(tank_html, unsafe_allow_html=True)
 
-    # === KOLOM KANAN: DATA & KONTROL (FIXED STRUCTURE) ===
+    # === KOLOM KANAN: DATA & KONTROL ===
     with col_right:
-        # Baris 1: Statistik (Grid 2 kolom)
         c1, c2 = st.columns(2, gap="medium")
         with c1:
             st.markdown(f"""
@@ -237,7 +293,6 @@ def show_dashboard():
             </div>
             """, unsafe_allow_html=True)
 
-        # Baris 2: Panel Kontrol
         with st.container():
             st.markdown("""
             <div class="glass-card-container" style="margin-top: 20px;">
@@ -247,39 +302,78 @@ def show_dashboard():
             ctrl_c1, ctrl_c2 = st.columns(2)
             with ctrl_c1:
                 st.write("📡 **Mode Operasi**")
-                st.radio(
-                    "Mode", ["AUTO", "MANUAL"],
-                    index=0 if mode == "AUTO" else 1,
-                    key="radio_mode", horizontal=True, label_visibility="collapsed",
-                    on_change=update_mode
-                )
+                st.radio("Mode", ["AUTO", "MANUAL"], index=0 if mode == "AUTO" else 1, key="radio_mode", horizontal=True, label_visibility="collapsed", on_change=update_mode)
             with ctrl_c2:
                 st.write("🔌 **Saklar Pompa**")
                 is_disabled = (mode == "AUTO")
-                st.toggle(
-                    "Power", value=is_pump_on, key="toggle_pump",
-                    disabled=is_disabled, label_visibility="collapsed",
-                    on_change=update_pump_toggle
-                )
+                st.toggle("Power", value=is_pump_on, key="toggle_pump", disabled=is_disabled, label_visibility="collapsed", on_change=update_pump_toggle)
                 caption = "🔒 *Mode AUTO aktif*" if is_disabled else "👆 *Geser untuk ON/OFF*"
                 st.caption(caption)
-            
-            st.markdown("</div>", unsafe_allow_html=True) # Penutup container kontrol
+            st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# 8. HALAMAN LANDING PAGE
+# 8. HALAMAN LANDING PAGE (UI BARU YANG CANTIK)
 # ==========================================
 def show_home():
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown('<div class="main-title">💧 SMART WATER TANK</div>', unsafe_allow_html=True)
+    # 1. HERO SECTION
+    st.markdown('<div class="hero-title">SMART WATER TANK</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-subtitle">Sistem Monitoring & Kontrol Air Berbasis IoT Firebase</div>', unsafe_allow_html=True)
+    
+    # 2. HERO IMAGE (Floating & Glowing)
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
-        st.image("Smart Water Tank.jpg", use_container_width=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🚀 MASUK KE DASHBOARD", use_container_width=True, type="primary"):
+        # Gunakan HTML container agar bisa dikasih class CSS
+        st.markdown('<div class="hero-image-container">', unsafe_allow_html=True)
+        try:
+            st.image("Smart Water Tank.jpg", use_container_width=True)
+        except:
+            st.info("ℹ️ Masukkan gambar 'Smart Water Tank.jpg' agar tampilan maksimal.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # 3. FITUR HIGHLIGHTS (3 Grid Cards)
+    f1, f2, f3 = st.columns(3, gap="medium")
+    
+    with f1:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Realtime Monitor</div>
+            <div class="feature-desc">Pantau ketinggian air dan tekanan secara presisi setiap detik tanpa jeda.</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with f2:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-title">Otomatisasi Cerdas</div>
+            <div class="feature-desc">Pompa menyala otomatis saat air habis dan mati saat penuh (Mode AUTO).</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with f3:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">☁️</div>
+            <div class="feature-title">Cloud Firebase</div>
+            <div class="feature-desc">Data tersimpan aman di cloud dan dapat diakses dari mana saja di seluruh dunia.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 4. TOMBOL CTA (Call to Action)
+    st.markdown("<br>", unsafe_allow_html=True)
+    b1, b2, b3 = st.columns([1, 1, 1])
+    with b2:
+        # Tombol besar di tengah
+        if st.button("🚀 MASUK KE DASHBOARD", use_container_width=True):
             st.session_state.show_dashboard = True
             st.rerun()
+            
+    st.markdown("<div style='text-align:center; margin-top:50px; color:#aaa; font-size:0.8rem;'>© 2025 Smart Water Project • IoT Division</div>", unsafe_allow_html=True)
 
+# ==========================================
+# MAIN EXECUTION
+# ==========================================
 if __name__ == "__main__":
     if st.session_state.show_dashboard:
         show_dashboard()

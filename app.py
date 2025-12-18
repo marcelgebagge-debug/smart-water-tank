@@ -67,7 +67,7 @@ if 'show_dashboard' not in st.session_state:
     st.session_state.show_dashboard = False
 
 # ==========================================
-# 5. LOGIKA DATA
+# 5. LOGIKA DATA (BACKEND)
 # ==========================================
 def get_data():
     if not PAKAI_FIREBASE_ASLI: return None
@@ -80,6 +80,7 @@ def set_data(path, value):
     except: return False
 
 def sync_data():
+    """Mengambil data dari Firebase untuk ditampilkan"""
     real_data = get_data()
     if real_data:
         for section in ['control', 'sensor', 'status']:
@@ -88,22 +89,30 @@ def sync_data():
                     st.session_state.dummy_data[section] = {}
                 st.session_state.dummy_data[section].update(real_data[section])
     else:
+        # Jika database kosong, inisialisasi
         set_data('/', st.session_state.dummy_data)
 
-def update_pump_toggle():
-    new_state = st.session_state['toggle_pump']
+def toggle_pump_state():
+    """Fungsi untuk membalik status pompa (ON/OFF) saat tombol ditekan"""
+    current_status = st.session_state.dummy_data['status']['pump']
+    new_state = not current_status # Balik status
+    
     if PAKAI_FIREBASE_ASLI:
         set_data('/control/manual_pump', new_state)
         set_data('/status/pump', new_state)
+    
     st.session_state.dummy_data['control']['manual_pump'] = new_state
     st.session_state.dummy_data['status']['pump'] = new_state
 
-def update_mode():
-    new_mode = st.session_state['radio_mode']
-    db_val = "AUTO" if "AUTO" in new_mode else "MANUAL"
+def toggle_mode_state():
+    """Fungsi untuk membalik Mode (AUTO/MANUAL) saat tombol ditekan"""
+    current_mode = st.session_state.dummy_data['control']['mode']
+    new_mode = "MANUAL" if current_mode == "AUTO" else "AUTO"
+    
     if PAKAI_FIREBASE_ASLI:
-        set_data('/control/mode', db_val)
-    st.session_state.dummy_data['control']['mode'] = db_val
+        set_data('/control/mode', new_mode)
+    
+    st.session_state.dummy_data['control']['mode'] = new_mode
 
 # ==========================================
 # 6. STYLING CSS
@@ -124,9 +133,41 @@ st.markdown("""
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
-        padding: 25px; /* Padding sedikit lebih besar */
+        padding: 25px;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         margin-bottom: 20px;
+    }
+
+    /* CUSTOM BUTTON STYLE (UNTUK SAKLAR) */
+    div.stButton > button {
+        width: 100%;
+        min-height: 100px; /* Tinggi tombol besar */
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        color: white;
+        font-size: 1.8rem !important; /* Huruf Besar */
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    /* Efek Hover Tombol */
+    div.stButton > button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #4facfe;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        color: #4facfe;
+    }
+    
+    /* Tombol saat Disabled */
+    div.stButton > button:disabled {
+        background: rgba(255, 255, 255, 0.02);
+        color: #555;
+        border-color: rgba(255, 255, 255, 0.05);
+        cursor: not-allowed;
     }
 
     /* JUDUL */
@@ -134,22 +175,6 @@ st.markdown("""
         font-size: 2.5rem; font-weight: 700; text-align: center;
         background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .sub-title {
-        text-align: center; color: #a8b0c5; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 40px;
-    }
-    
-    /* PANEL HEADER */
-    .panel-header {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 10px 20px;
-        border-radius: 10px;
-        font-weight: 600;
-        color: #fff;
-        letter-spacing: 1px;
-        margin-bottom: 20px;
-        text-transform: uppercase;
-        font-size: 0.9rem;
     }
 
     /* VISUAL TANGKI */
@@ -164,44 +189,13 @@ st.markdown("""
     .stat-label-fix { color: #a8b0c5; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;}
     .stat-value-fix { font-size: 2.2rem; font-weight: 700; color: white; }
     .unit-fix { font-size: 1rem; color: #4facfe; font-weight: 400; }
-
-    /* MODIFIKASI TOMBOL */
-    div[data-testid="stCheckbox"] label span { font-size: 1.1rem !important; }
-    div[data-testid="stCheckbox"] div[role="switch"] { transform: scale(1.3); margin-right: 10px; }
     
-    /* RADIO BUTTON GAYA PILL/CAPSULE */
-    div[role="radiogroup"] { flex-direction: row; gap: 10px; }
-    div[role="radiogroup"] label {
-        background-color: transparent !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-        border-radius: 50px !important; /* Membuatnya bulat lonjong */
-        padding: 5px 15px !important;
-        transition: all 0.3s ease;
-    }
-    div[role="radiogroup"] label[data-checked="true"] {
-        background-color: rgba(79, 172, 254, 0.2) !important;
-        border-color: #4facfe !important;
-        color: #4facfe !important;
-    }
-
     #MainMenu, footer, header {visibility: hidden;}
     
-    /* LANDING PAGE */
-    .hero-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; text-align: center; background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 20px; text-shadow: 0 0 40px rgba(0, 198, 255, 0.3); animation: fadeInDown 1s ease-out; }
-    .hero-subtitle { text-align: center; font-size: 1.2rem; color: #e0e0e0; margin-bottom: 40px; font-weight: 300; letter-spacing: 1px; animation: fadeInUp 1s ease-out; }
-    .hero-image-container { display: flex; justify-content: center; margin-bottom: 40px; animation: zoomIn 1.2s ease-out; }
-    .hero-image-container img { border-radius: 20px; box-shadow: 0 0 30px rgba(0, 198, 255, 0.5); border: 2px solid rgba(255, 255, 255, 0.1); transition: transform 0.3s; }
-    .hero-image-container img:hover { transform: scale(1.02); box-shadow: 0 0 50px rgba(0, 198, 255, 0.8); }
-    .feature-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); transition: transform 0.3s, background 0.3s; height: 100%; }
-    .feature-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.1); border-color: #00c6ff; }
-    .feature-icon { font-size: 2.5rem; margin-bottom: 10px; }
-    .feature-title { font-weight: 700; color: #fff; margin-bottom: 5px; }
-    .feature-desc { font-size: 0.85rem; color: #ccc; }
-    div.stButton > button { background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 50px; box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3); transition: all 0.3s; width: 100%; }
-    div.stButton > button:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 15px 30px rgba(0, 114, 255, 0.5); }
-    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    /* LANDING PAGE CSS (Tetap sama) */
+    .hero-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; text-align: center; background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 20px; }
+    .hero-subtitle { text-align: center; font-size: 1.2rem; color: #e0e0e0; margin-bottom: 40px; }
+    .feature-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); height: 100%; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -219,13 +213,15 @@ def show_dashboard():
     is_pump_on = bool(data['status']['pump'])
     mode = str(data['control']['mode'])
 
-    # Tombol Back to Home (Kecil di pojok)
-    if st.button("⬅️ Kembali ke Home"):
-        st.session_state.show_dashboard = False
-        st.rerun()
+    # Tombol Back (Kita atur supaya tidak terlalu besar nanti lewat layout)
+    c_back, _ = st.columns([1, 6])
+    with c_back:
+        if st.button("⬅️ Home", key="btn_back"):
+            st.session_state.show_dashboard = False
+            st.rerun()
 
     st.markdown('<div class="main-title">DASHBOARD MONITORING</div>', unsafe_allow_html=True)
-    st.write("") # Spacer
+    st.write("") 
 
     col_left, col_right = st.columns([1.2, 1.8], gap="large")
 
@@ -268,41 +264,46 @@ def show_dashboard():
             </div>
             """, unsafe_allow_html=True)
 
-
-        # Grid layout di dalam panel kontrol (2 Kolom)
-        ctrl_c1, ctrl_c2 = st.columns(2, gap="large")
+        # --- BAGIAN 2: SAKLAR KONTROL (CUSTOM BUTTONS) ---
+        st.write("") # Spacer
         
+        ctrl_c1, ctrl_c2 = st.columns(2, gap="medium")
+        
+        # 1. TOMBOL MODE OPERASI
         with ctrl_c1:
-            st.markdown("📡 **Mode Operasi**")
-            st.write("") # Spacer kecil
-            # Radio Button
-            st.radio(
-                "Pilih Mode",
-                ["🤖 AUTO", "👋 MANUAL"],
-                index=0 if mode == "AUTO" else 1,
-                key="radio_mode",
-                horizontal=True,
-                label_visibility="collapsed",
-                on_change=update_mode
-            )
+            st.markdown('<div class="stat-label-fix" style="text-align:center; margin-bottom:10px;">🛠️ Mode Operasi</div>', unsafe_allow_html=True)
+            
+            # Label menampilkan status saat ini
+            # Jika diklik, jalankan fungsi toggle_mode_state
+            if st.button(f"{mode}", key="btn_mode", use_container_width=True):
+                toggle_mode_state()
+                st.rerun()
 
+        # 2. TOMBOL SAKLAR POMPA
         with ctrl_c2:
-            st.markdown("🔌 **Saklar Pompa**")
+            st.markdown('<div class="stat-label-fix" style="text-align:center; margin-bottom:10px;">🔌 Saklar Pompa</div>', unsafe_allow_html=True)
+            
             # Logic Disable
             is_disabled = (mode == "AUTO")
-            st.toggle(
-                "Power Pompa", 
-                value=is_pump_on, 
-                key="toggle_pump", 
-                disabled=is_disabled, 
-                label_visibility="collapsed",
-                on_change=update_pump_toggle
-            )
-            # Caption di bawah toggle
-            caption_text = "🔒 *Terkunci (Mode Auto)*" if is_disabled else "👆 *Geser untuk ON/OFF*"
-            st.caption(caption_text)
-                
-        st.markdown('</div>', unsafe_allow_html=True) # End glass-card-container
+            
+            # Label Tombol
+            if is_disabled:
+                pump_label = "🔒 AUTO"
+                help_text = "Mode Auto Aktif"
+            else:
+                pump_label = "NYALA" if is_pump_on else "MATI"
+                help_text = "Klik untuk Ubah"
+            
+            # Jika diklik (dan tidak disabled), jalankan toggle_pump_state
+            if st.button(pump_label, key="btn_pump", disabled=is_disabled, use_container_width=True):
+                toggle_pump_state()
+                st.rerun()
+
+        st.markdown("""
+        <div style="text-align:center; margin-top:15px; font-size:0.75rem; color:rgba(255,255,255,0.4);">
+        *Klik tombol panel di atas untuk mengubah status secara manual*
+        </div>
+        """, unsafe_allow_html=True)
 
 # ==========================================
 # 8. HALAMAN LANDING PAGE
@@ -313,20 +314,17 @@ def show_home():
     
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
-        st.markdown('<div class="hero-image-container">', unsafe_allow_html=True)
-        try: st.image("Smart Water Tank.jpg", use_container_width=True)
-        except: pass
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div style="display:flex; justify-content:center; margin-bottom:30px;"><div style="width:200px; height:200px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:4rem;">💧</div></div>', unsafe_allow_html=True)
 
     f1, f2, f3 = st.columns(3, gap="medium")
-    with f1: st.markdown("""<div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Realtime Monitor</div><div class="feature-desc">Pantau ketinggian air dan tekanan secara presisi setiap detik.</div></div>""", unsafe_allow_html=True)
-    with f2: st.markdown("""<div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Otomatisasi</div><div class="feature-desc">Pompa menyala otomatis saat air habis dan mati saat penuh.</div></div>""", unsafe_allow_html=True)
-    with f3: st.markdown("""<div class="feature-card"><div class="feature-icon">☁️</div><div class="feature-title">Cloud Firebase</div><div class="feature-desc">Data tersimpan aman di cloud dan dapat diakses dari mana saja.</div></div>""", unsafe_allow_html=True)
+    with f1: st.markdown("""<div class="feature-card"><div style="font-size:2rem;">📊</div><div style="font-weight:bold; margin:10px 0;">Realtime Monitor</div><div style="font-size:0.8rem; color:#ccc;">Pantau ketinggian air dan tekanan secara presisi.</div></div>""", unsafe_allow_html=True)
+    with f2: st.markdown("""<div class="feature-card"><div style="font-size:2rem;">⚡</div><div style="font-weight:bold; margin:10px 0;">Otomatisasi</div><div style="font-size:0.8rem; color:#ccc;">Pompa otomatis menyala sesuai level air.</div></div>""", unsafe_allow_html=True)
+    with f3: st.markdown("""<div class="feature-card"><div style="font-size:2rem;">☁️</div><div style="font-weight:bold; margin:10px 0;">Cloud Firebase</div><div style="font-size:0.8rem; color:#ccc;">Data tersimpan aman dan dapat diakses remote.</div></div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     b1, b2, b3 = st.columns([1, 1, 1])
     with b2:
-        if st.button("🚀 MASUK KE DASHBOARD", use_container_width=True):
+        if st.button("🚀 MASUK KE DASHBOARD", key="btn_home_enter", use_container_width=True):
             st.session_state.show_dashboard = True
             st.rerun()
             
@@ -340,4 +338,3 @@ if __name__ == "__main__":
         show_dashboard()
     else:
         show_home()
-
